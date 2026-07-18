@@ -1,0 +1,57 @@
+name: Autograding System
+
+on:
+  push:
+    branches:
+      - main
+      - master
+
+# อนุญาตให้ Actions สามารถ Push ไฟล์กลับขึ้น Repository ได้
+permissions:
+  contents: write
+
+jobs:
+  grade:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      - name: Install dependencies
+        run: |
+          npm install
+          npm install newman # ติดตั้ง newman เพื่อรัน Postman Collection
+
+      - name: Pull & Run PostgreSQL Docker container
+        run: |
+          # ใช้คำสั่งตามที่คุณต้องการ
+          docker run --name database-postgres -e POSTGRES_PASSWORD=postgres -p 5432:5432 -d postgres
+          # รอประมาณ 10 วินาทีให้ Database พร้อมทำงาน
+          sleep 10 
+
+      - name: Setup Database Tables
+        run: |
+          # ปรับจาก -it เป็น -i เพื่อให้ใช้งานบน CI/CD ได้ และยิงไฟล์ Tables.sql เข้าไปสร้างตาราง
+          docker exec -i database-postgres psql -U postgres < __tests__/Tables.sql || echo "Run SQL Failed or Not Found"
+
+      - name: Run Autograding
+        run: node autograde.js
+
+      - name: Push Grades to 'grades' branch
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          
+          # สลับไปที่ branch 'grades' (ถ้ายังไม่มีก็จะสร้างใหม่)
+          git checkout -b grades
+          
+          # Add ไฟล์คะแนนที่สร้างจาก autograde.js
+          git add grade.json grade.md
+          
+          git commit -m "📝 Update autograding results [skip ci]" || echo "No changes to commit"
+          git push -f origin grades
