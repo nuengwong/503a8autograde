@@ -1,55 +1,25 @@
 {
 	"info": {
-		"_postman_id": "dc2591f8-0995-4dcc-a9cc-7ae68929dd7f",
-		"name": "VacQ_assignment4",
+		"_postman_id": "8be0182e-3e58-433b-97bc-61ba12f12669",
+		"name": "Albums",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
 		"_exporter_id": "15205475"
 	},
 	"item": [
 		{
-			"name": "get all",
+			"name": "create",
 			"event": [
 				{
 					"listen": "test",
 					"script": {
 						"exec": [
-							"pm.test(\"Status code is 200\", function () {\r",
-							"    pm.response.to.have.status(200);\r",
-							"});"
-						],
-						"type": "text/javascript"
-					}
-				}
-			],
-			"request": {
-				"method": "GET",
-				"header": [],
-				"url": {
-					"raw": "http://localhost:5000/api/v1/hospitals/",
-					"protocol": "http",
-					"host": [
-						"localhost"
-					],
-					"port": "5000",
-					"path": [
-						"api",
-						"v1",
-						"hospitals",
-						""
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "post",
-			"event": [
-				{
-					"listen": "test",
-					"script": {
-						"exec": [
-							"pm.test(\"Status code is 200\", function () {\r",
-							"    pm.response.to.have.status(200);\r",
+							"pm.test(\"Status code is 201\", function () {\r",
+							"    pm.response.to.have.status(201);    \r",
+							"    const response = pm.response.json();\r",
+							"    console.log(pm.response.json());\r",
+							"    console.log(\"POST: \"+ response[0].id);\r",
+							"    pm.expect(response[0].id).to.greaterThan(0);\r",
+							"    pm.globals.set(\"global_album_id\",response[0].id);\r",
 							"});\r",
 							"\r",
 							""
@@ -61,18 +31,61 @@
 			"request": {
 				"method": "POST",
 				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"title\":\"{{$randomFirstName}}\",\r\n    \"artist\":\"{{$randomFirstName}}\",\r\n    \"price\":\"{{$randomPrice}}\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
 				"url": {
-					"raw": "http://localhost:5000/api/v1/hospitals/",
+					"raw": "http://localhost:5000/albums",
 					"protocol": "http",
 					"host": [
 						"localhost"
 					],
 					"port": "5000",
 					"path": [
-						"api",
-						"v1",
-						"hospitals",
-						""
+						"albums"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "get all",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"    const response = pm.response.json();\r",
+							"    //console.log(response.count());\r",
+							"    pm.expect(response.count()).to.greaterThan(0);\r",
+							"    \r",
+							"});\r",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:5000/albums",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "5000",
+					"path": [
+						"albums"
 					]
 				}
 			},
@@ -87,7 +100,12 @@
 						"exec": [
 							"pm.test(\"Status code is 200\", function () {\r",
 							"    pm.response.to.have.status(200);\r",
-							"});"
+							"    const response = pm.response.json();\r",
+							"    console.log(response.id);\r",
+							"    pm.expect(response.id).to.greaterThan(0);\r",
+							"});\r",
+							"\r",
+							""
 						],
 						"type": "text/javascript"
 					}
@@ -97,24 +115,28 @@
 				"method": "GET",
 				"header": [],
 				"url": {
-					"raw": "http://localhost:5000/api/v1/hospitals/1",
+					"raw": "http://localhost:5000/albums/:id",
 					"protocol": "http",
 					"host": [
 						"localhost"
 					],
 					"port": "5000",
 					"path": [
-						"api",
-						"v1",
-						"hospitals",
-						"1"
+						"albums",
+						":id"
+					],
+					"variable": [
+						{
+							"key": "id",
+							"value": "{{global_album_id}}"
+						}
 					]
 				}
 			},
 			"response": []
 		},
 		{
-			"name": "put",
+			"name": "update",
 			"event": [
 				{
 					"listen": "test",
@@ -122,27 +144,47 @@
 						"exec": [
 							"pm.test(\"Status code is 200\", function () {\r",
 							"    pm.response.to.have.status(200);\r",
-							"});"
+							"    const response = pm.response.json();\r",
+							"    console.log(response[0].id);\r",
+							"    pm.expect(response[0].id).to.greaterThan(0);\r",
+							"    pm.expect(response[0].artist).to.equal(\"Tilly Bird\");\r",
+							"\r",
+							"});\r",
+							"\r",
+							""
 						],
 						"type": "text/javascript"
 					}
 				}
 			],
 			"request": {
-				"method": "GET",
+				"method": "PUT",
 				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"title\":\"{{$randomFirstName}}\",\r\n    \"artist\":\"Tilly Bird\",\r\n    \"price\":\"{{$randomPrice}}\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
 				"url": {
-					"raw": "http://localhost:5000/api/v1/hospitals/1",
+					"raw": "http://localhost:5000/albums/:id",
 					"protocol": "http",
 					"host": [
 						"localhost"
 					],
 					"port": "5000",
 					"path": [
-						"api",
-						"v1",
-						"hospitals",
-						"1"
+						"albums",
+						":id"
+					],
+					"variable": [
+						{
+							"key": "id",
+							"value": "{{global_album_id}}"
+						}
 					]
 				}
 			},
@@ -157,6 +199,11 @@
 						"exec": [
 							"pm.test(\"Status code is 200\", function () {\r",
 							"    pm.response.to.have.status(200);\r",
+							"    const response = pm.response.json();\r",
+							"    console.log(response.success);\r",
+							"    pm.expect(response.success).to.equal(true);\r",
+							"    \r",
+							"\r",
 							"});"
 						],
 						"type": "text/javascript"
@@ -164,20 +211,24 @@
 				}
 			],
 			"request": {
-				"method": "GET",
+				"method": "DELETE",
 				"header": [],
 				"url": {
-					"raw": "http://localhost:5000/api/v1/hospitals/1",
+					"raw": "http://localhost:5000/albums/:id",
 					"protocol": "http",
 					"host": [
 						"localhost"
 					],
 					"port": "5000",
 					"path": [
-						"api",
-						"v1",
-						"hospitals",
-						"1"
+						"albums",
+						":id"
+					],
+					"variable": [
+						{
+							"key": "id",
+							"value": "{{global_album_id}}"
+						}
 					]
 				}
 			},
